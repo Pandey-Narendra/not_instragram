@@ -19,6 +19,7 @@ export type INavLink = {
     file: File[];
     location?: string;
     tags?: string;
+    imageUrl? : string | URL;
   };
   
   export type IUpdatePost = {

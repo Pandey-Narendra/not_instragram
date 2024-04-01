@@ -1,6 +1,6 @@
 import { ID, Query } from "appwrite";
-import { INewUser } from "@/types";
-import { account, appwriteConfig, avatars, databases } from "./config";
+import { INewPost, INewUser } from "@/types";
+import { account, appwriteConfig, avatars, storage, databases } from "./config";
 
 
 // ============================== SIGN UP ==============================
@@ -23,11 +23,11 @@ export async function createUserAccount(user: INewUser){
 
         // save user details to database
         const newUser = await saveUserToDB({
-            accountid: newAccount.$id,
+            accountId: newAccount.$id,
             name: newAccount.name,
             email: newAccount.email,
             username: user.username,
-            imageURL: avatarUrl,
+            imageUrl: avatarUrl,
         });
 
         // console.log('createUserAccount saveUserToDB ', newUser)
@@ -42,10 +42,10 @@ export async function createUserAccount(user: INewUser){
 
 // ============================== SAVE USER TO DB ==============================
 export async function saveUserToDB(user:{
-    accountid: string;
+    accountId: string;
     email: string;
     name:string;
-    imageURL: URL;
+    imageUrl: URL;
     username?: string;
 }) {
     // console.log('function saveUserToDB', user);
@@ -105,7 +105,7 @@ export async function getCurrentUser() {
         const currentUser = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
-            [Query.equal("accountid", currentAccount.$id)]
+            [Query.equal("accountId", currentAccount.$id)]
         );
         // console.log('listDocuments',currentUser.documents[0]);
 
@@ -120,4 +120,115 @@ export async function getCurrentUser() {
         // console.log('listDocuments error', error);
         return null;
     }
+}
+
+export async function signOutAccount() {
+    try{
+        const session = await account.deleteSession('current');
+        return session;
+    }catch(error){
+        console.log(error)
+    }
+}
+
+
+// ============================== CREATE POST
+export async function createPost(post:INewPost){
+    // Upload Image to media inside storage section 
+    try{
+        const uploadedFile = await uploadFile(post.file[0]);
+        
+        if(!uploadedFile) throw Error;
+
+        // Get Url of the Media File
+        const fileUrl = getFilePreview(uploadedFile.$id);
+        if(!fileUrl){
+            await deleteFile(uploadedFile.$id);
+            throw Error;
+        }
+
+        // Convert tags in an array
+        const tags = post.tags?.replace(/ /g,'').split(',') || [];
+
+        // Save Post to database
+        // Create post to database
+        const newPost = await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            ID.unique(),
+            {
+                creator: post.userId,
+                caption: post.caption,
+                imageUrl: fileUrl,
+                imageId: uploadedFile.$id,
+                location: post.location,
+                tags: tags,
+            });
+    
+        if (!newPost) {
+            await deleteFile(uploadedFile.$id);
+            throw Error;
+        }
+    
+        return newPost;
+
+
+    }catch(error){
+        console.log(error)
+    }
+} 
+
+
+export function getFilePreview(filedId: string){
+    try{
+        const fileUrl = storage.getFilePreview(
+            appwriteConfig.storageId,
+            filedId,
+            2000,
+            2000,
+            "top",
+            100,
+        );
+        
+        return fileUrl;
+
+    }catch(error){
+        console.log(error)
+    }
+}
+
+export async function deleteFile(fileId: string){
+    try{
+        await storage.deleteFile(appwriteConfig.storageId,fileId);
+        return {status: 'ok'}
+    }catch(error){
+        console.log(error);
+    }
+}
+
+// ============================== UPLOAD FILE
+export async function uploadFile(file:File) {
+    try{
+        const uploadedFile = await storage.createFile(
+            appwriteConfig.storageId,
+            ID.unique(),
+            file
+        );
+
+        return uploadedFile;
+    }catch(error){
+        console.log(error);
+    }
+}
+
+export async function getRecentPosts() {
+    const posts = await databases.listDocuments(
+        appwriteConfig.databaseId,
+        appwriteConfig.postCollectionId,
+        [Query.orderDesc('$createdAt'), Query.limit(20)]
+    );
+
+    if(!posts) throw Error;
+
+    return posts;
 }
