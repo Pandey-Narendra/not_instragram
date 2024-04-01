@@ -1,7 +1,6 @@
 import { INewPost, INewUser } from "@/types";
 
 import {
-    QueryClient,
     useMutation,
     useQuery,
     useQueryClient,

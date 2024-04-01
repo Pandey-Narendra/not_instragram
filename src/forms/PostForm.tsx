@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Models } from "appwrite";
 
 import { PostValidation } from "@/lib/validation";
-import { useCreatePost, useUpdatePost } from "@/lib/react-query/queriesAndMutations";
+import { useCreatePost} from "@/lib/react-query/queriesAndMutations";
 
 import { useUserContext } from "@/context/AuthContext";
 

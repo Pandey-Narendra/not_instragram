@@ -12,7 +12,7 @@ import { useSignOutAccount } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext, INITIAL_USER } from "@/context/AuthContext";
 
 const LeftSideBar = () => {
-	const { user, setUser, setIsAuthenticated, isLoading } = useUserContext();
+	const { user, setUser, setIsAuthenticated } = useUserContext();
 	const { pathname } = useLocation();
 	const navigate = useNavigate();
 
