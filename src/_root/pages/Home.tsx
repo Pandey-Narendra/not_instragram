@@ -3,6 +3,7 @@ import { Models } from "appwrite";
 import Loader from "@/components/shared/Loader";
 
 import { useGetRecentPosts } from "@/lib/react-query/queriesAndMutations";
+
 import PostCard from "@/components/shared/PostCard";
 
 const Home = () => {
@@ -37,10 +38,10 @@ const Home = () => {
                             <ul className="grid 2xl:grid-cols-2 gap-6">
                                 {
                                     posts?.documents.map((post: Models.Document, index) => (
-                                    <li key={index} className="flex justify-center w-full">
-                                        <PostCard post={post} />
-                                    </li>
-                                )) 
+                                        <li key={index} className="flex justify-center w-full">
+                                            <PostCard post={post} />
+                                        </li>
+                                    )) 
                                 }
                             </ul>
                         )

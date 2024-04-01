@@ -16,6 +16,7 @@ const LeftSideBar = () => {
 	const { pathname } = useLocation();
 	const navigate = useNavigate();
 
+	// to call sign out mutate fn
 	const { mutate: signOut } = useSignOutAccount();
 
 	const handleSignOut = async (
@@ -87,8 +88,8 @@ const LeftSideBar = () => {
 		<Button
 			variant="ghost"
 			className="shad-button_ghost"
-			onClick={(e) => handleSignOut(e)}
-			>
+			onClick={(e) => handleSignOut(e)} >
+				
 			<img src="/assets/icons/logout.svg" alt="logout" />
 			<p className="small-medium lg:base-medium">Logout</p>
 		</Button>
