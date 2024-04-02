@@ -1,5 +1,5 @@
 import GridPostList from "@/components/shared/GridPostList";
-import SearchResults from "@/components/shared/SearchResults";
+// import SearchResults from "@/components/shared/SearchResults";
 import { Input } from "@/components/ui/input"
 import useDebounce from "@/hooks/useDebounce";
 import { useGetPosts, useSearchPosts } from "@/lib/react-query/queriesAndMutations";
@@ -15,7 +15,7 @@ const Explore = () => {
 	const DebouncedValue = useDebounce(searchValue, 500);
 
 	const { data: posts, fetchNextPage, hasNextPage } = useGetPosts();
-	const { data: searchedPosts, isFetching: isSearchFetching } = useSearchPosts(DebouncedValue);
+	// const { data: searchedPosts, isFetching: isSearchFetching } = useSearchPosts(DebouncedValue);
 
 	useEffect(() => {
 		if(inView && !searchValue) fetchNextPage();
@@ -65,8 +65,8 @@ const Explore = () => {
 
 			<div className="flex flex-wrap gap-9 w-full max-w-5xl">
 				{shouldShowSearchResults ? (
-				
-					<SearchResults isSearchFetching = {isSearchFetching} searchedPosts = {searchedPosts}  />
+					''
+					// <SearchResults isSearchFetching = {isSearchFetching} searchedPosts = {searchedPosts}  />
 				
 				): shouldShowPosts ? (
 					

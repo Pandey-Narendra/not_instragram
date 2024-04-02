@@ -24,7 +24,7 @@ import {
 	updatePost
 } from "../appwrite/api";
 import { QUERY_KEYS } from "./queryKeys";
-import { AnyCnameRecord } from "dns";
+
 
 // ============================================================
 // AUTH QUERIES
