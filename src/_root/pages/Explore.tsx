@@ -1,8 +1,8 @@
 import GridPostList from "@/components/shared/GridPostList";
 // import SearchResults from "@/components/shared/SearchResults";
 import { Input } from "@/components/ui/input"
-import useDebounce from "@/hooks/useDebounce";
-import { useGetPosts, useSearchPosts } from "@/lib/react-query/queriesAndMutations";
+// import useDebounce from "@/hooks/useDebounce";
+import { useGetPosts} from "@/lib/react-query/queriesAndMutations";
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useInView } from 'react-intersection-observer';
@@ -12,7 +12,7 @@ const Explore = () => {
 	const [searchValue, setSearchValue] = useState('');
 
 	// to optimise the search on every key stock 
-	const DebouncedValue = useDebounce(searchValue, 500);
+	// const DebouncedValue = useDebounce(searchValue, 500);
 
 	const { data: posts, fetchNextPage, hasNextPage } = useGetPosts();
 	// const { data: searchedPosts, isFetching: isSearchFetching } = useSearchPosts(DebouncedValue);
@@ -72,7 +72,7 @@ const Explore = () => {
 					
 					<p className="text-light-4 mt-10 text-center w-full">End of posts</p>
 				
-				): posts.pages.map( (items,index) => (
+				): posts.pages.map( (items) => (
 
 					<GridPostList key={`page-{$index}`} posts={items.documents} />
 
