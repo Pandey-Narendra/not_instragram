@@ -1,5 +1,5 @@
 import { ID, Query } from "appwrite";
-import { INewPost, INewUser } from "@/types";
+import { INewPost, INewUser, IUpdatePost } from "@/types";
 import { account, appwriteConfig, avatars, storage, databases } from "./config";
 
 
@@ -179,8 +179,6 @@ export async function createPost(post:INewPost){
     }
 } 
 
-
-
 export function getFilePreview(filedId: string){
     try{
         const fileUrl = storage.getFilePreview(
@@ -280,7 +278,6 @@ export async function savePost(userId: string, postId: string) {
     }
 }
 
-
 // ============================== DELETE SAVED POST ==============================
 export async function deleteSavedPost(savedRecordId: string) {
     try {
@@ -298,7 +295,6 @@ export async function deleteSavedPost(savedRecordId: string) {
     }
 }
 
-
 // ============================== POSTS BY ID ==============================
 export async function getPostById(postId: string) {
     try{
@@ -313,3 +309,91 @@ export async function getPostById(postId: string) {
         console.log(error);
     }
 }
+
+// ============================== UPDATE POST ==============================
+export async function updatePost(post:IUpdatePost) {
+    
+    const hasFileToUpdate = post.file.length > 0;
+    
+    try{
+        let image = {
+            imageUrl : post.imageUrl,
+            imageId: post.imageId,
+        };
+
+        // upload updated file to appwrite storage
+        if(hasFileToUpdate){
+            const uploadedFile = await uploadFile(post.file[0]);
+            if(!uploadedFile) throw Error;
+
+            // get new file url
+            const fileUrl = getFilePreview(uploadedFile.$id);
+            if(!fileUrl){
+                await deleteFile(uploadedFile.$id);
+                throw Error;
+            }
+
+            image = { ...image, imageUrl: fileUrl, imageId: uploadedFile.$id };
+        }
+
+       // Convert tags into array
+        const tags = post.tags?.replace(/ /g, "").split(",") || [];
+
+        // Update Post
+        const updatePost = await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            post.postId,
+            {
+                caption: post.caption,
+                imageUrl: image.imageUrl,
+                imageId: image.imageId,
+                location: post.location,
+                tags: tags,  
+            }
+        );
+
+        // Failed to Update 
+        if(!updatePost){
+
+            // Delete new file that  has been recently uploaded
+            if(hasFileToUpdate){
+                await deleteFile(image.imageId);
+            }
+            throw Error;
+        }
+
+        // Delete old file after successful update with new file
+        if(hasFileToUpdate){
+            await deleteFile(post.imageId);
+        }
+
+        return updatePost;
+
+    }catch(error){
+        console.log(error)
+    }
+}
+
+// ============================== DELETE POST ==============================
+export async function deletePost(postId?: string, imageId?: string) {
+    if (!postId || !imageId) return;
+  
+    try {
+        const statusCode = await databases.deleteDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            postId
+        );
+
+        if (!statusCode) throw Error;
+
+        await deleteFile(imageId);
+
+        return { status: "Ok" };
+
+    }catch (error) {
+      console.log(error);
+    }
+  }
+  
