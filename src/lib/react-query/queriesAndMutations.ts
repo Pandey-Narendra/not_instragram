@@ -1,6 +1,7 @@
 import { INewPost, INewUser, IUpdatePost } from "@/types";
 
 import {
+	useInfiniteQuery,
     useMutation,
     useQuery,
     useQueryClient,
@@ -12,15 +13,18 @@ import {
     deletePost, 
     deleteSavedPost, 
     getCurrentUser, 
+    getInfinitePosts, 
     getPostById, 
     getRecentPosts, 
     likePost, 
     savePost, 
+    searchPosts, 
     signInAccount,
     signOutAccount,
 	updatePost
 } from "../appwrite/api";
 import { QUERY_KEYS } from "./queryKeys";
+import { AnyCnameRecord } from "dns";
 
 // ============================================================
 // AUTH QUERIES
@@ -196,3 +200,30 @@ export const useGetPostById = (postId: string) => {
         enabled: !!postId
     });
 }
+
+
+export const useGetPosts = () => {
+
+	return useInfiniteQuery({
+		queryKey: [QUERY_KEYS.GET_INFINITE_POSTS],
+		queryFn: getInfinitePosts as any,
+		getNextPageParam: (lastPage: any) => {
+			// If there's no data, there are no more pages.
+			if(lastPage && lastPage.documents.length === 0){
+				return null;
+			}
+
+			// use the $id of the last document as the cursor.
+			const lastId = lastPage.document[lastPage.document.length-1].$id;
+			return lastId;
+		}
+	})
+}
+
+export const useSearchPosts = (searchTerm: string) => {
+	return useQuery({
+		queryKey: [QUERY_KEYS.SEARCH_POSTS, searchTerm],
+		queryFn: () => searchPosts(searchTerm),
+		enabled: !!searchTerm,
+	});
+};
