@@ -1,13 +1,17 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/shared/Loader";
 import PostStats from "@/components/shared/PostStats";
+import GridPostList from "@/components/shared/GridPostList";
+
 import {
     useGetPostById,
-    //   useGetUserPosts,
+    useGetUserPosts,
     useDeletePost,
 } from "@/lib/react-query/queriesAndMutations";
 import { multiFormatDateString } from "@/lib/utils";
+
 import { useUserContext } from "@/context/AuthContext";
 
 const PostDetails = () => {
@@ -15,15 +19,17 @@ const PostDetails = () => {
     const { id } = useParams();
     const { user } = useUserContext();
 
-    const { data: post, isLoading } = useGetPostById(id || "");
-    //   const { data: userPosts, isLoading: isUserPostLoading } = useGetUserPosts(
-    //     post?.creator.$id
-    //   );
+    const { data: post, isLoading } = useGetPostById(id || '')
+
+    const { data: userPosts, isLoading: isUserPostLoading } = 
+        useGetUserPosts( post?.creator.$id )
+    ;
+
     const { mutate: deletePost } = useDeletePost();
 
-    //   const relatedPosts = userPosts?.documents.filter(
-    //     (userPost) => userPost.$id !== id
-    //   );
+    const relatedPosts = userPosts?.documents.filter(
+        (userPost) => userPost.$id !== id )
+    ;
 
     const handleDeletePost = () => {
         deletePost({ postId: id, imageId: post?.imageId });
@@ -49,7 +55,9 @@ const PostDetails = () => {
             </div>
 
             {isLoading || !post ? (
+
                 <Loader />
+
             ) : (
                 <div className="post_details-card">
                     <img
@@ -72,10 +80,12 @@ const PostDetails = () => {
                                     alt="creator"
                                     className="w-8 h-8 lg:w-12 lg:h-12 rounded-full"
                                 />
+
                                 <div className="flex gap-1 flex-col">
                                     <p className="base-medium lg:body-bold text-light-1">
                                         {post?.creator.name}
                                     </p>
+
                                     <div className="flex-center gap-2 text-light-3">
                                         <p className="subtle-semibold lg:small-regular ">
                                             {multiFormatDateString(post?.$createdAt)}
@@ -121,9 +131,13 @@ const PostDetails = () => {
                         <hr className="border w-full border-dark-4/80" />
 
                         <div className="flex flex-col flex-1 w-full small-medium lg:base-regular">
+                            
                             <p>{post?.caption}</p>
+                            
                             <ul className="flex gap-1 mt-2">
+                               
                                 {post?.tags.map((tag: string, index: string) => (
+                                    
                                     <li
                                         key={`${tag}${index}`}
                                         className="text-light-3 small-regular"
@@ -147,6 +161,12 @@ const PostDetails = () => {
                 <h3 className="body-bold md:h3-bold w-full my-10">
                     More Related Posts
                 </h3>
+
+                {isUserPostLoading || !relatedPosts ? (
+                    <Loader />
+                ) : (
+                    <GridPostList posts={relatedPosts} />
+                )}
             </div>
         </div>
     );
